@@ -95,7 +95,7 @@ int main(int argc, char **argv)
   ImageGrabber igb(&SLAM,&imugb,bEqual); // TODO
   
   // Maximum delay, 5 seconds
-  ros::Subscriber sub_imu = n.subscribe("/imu", 1000, &ImuGrabber::GrabImu, &imugb); 
+  ros::Subscriber sub_imu = n.subscribe("/android/imu", 1000, &ImuGrabber::GrabImu, &imugb);
   ros::Subscriber sub_img0 = n.subscribe("/camera/image_raw", 100, &ImageGrabber::GrabImage,&igb);
 
   std::thread sync_thread(&ImageGrabber::SyncWithImu,&igb);
@@ -107,6 +107,7 @@ int main(int argc, char **argv)
 
 void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &img_msg)
 {
+//    cout<<"GrabImage"<<endl;
   mBufMutex.lock();
   if (!img0Buf.empty())
     img0Buf.pop();
@@ -146,7 +147,9 @@ void ImageGrabber::SyncWithImu()
     double tIm = 0;
     if (!img0Buf.empty()&&!mpImuGb->imuBuf.empty())
     {
-      tIm = img0Buf.front()->header.stamp.toSec();
+//        cout<<"===== TrackMonocular start"<<" img0Buf.size() = "<<img0Buf.size()<<" mpImuGb->imuBuf.size() "<<mpImuGb->imuBuf.size()<<endl;
+
+        tIm = img0Buf.front()->header.stamp.toSec();
       if(tIm>mpImuGb->imuBuf.back()->header.stamp.toSec())
           continue;
       {
@@ -174,8 +177,9 @@ void ImageGrabber::SyncWithImu()
       mpImuGb->mBufMutex.unlock();
       if(mbClahe)
         mClahe->apply(im,im);
-
       mpSLAM->TrackMonocular(im,tIm,vImuMeas);
+//      cout<<" ====  TrackMonocular  ok"<<endl;
+
     }
 
     std::chrono::milliseconds tSleep(1);

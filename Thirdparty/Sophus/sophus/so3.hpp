@@ -13,7 +13,7 @@
 #include <Eigen/src/Geometry/OrthoMethods.h>
 #include <Eigen/src/Geometry/Quaternion.h>
 #include <Eigen/src/Geometry/RotationBase.h>
-
+#include <iostream>
 namespace Sophus {
 template <class Scalar_, int Options = 0>
 class SO3;
@@ -700,19 +700,22 @@ class SO3 : public SO3Base<SO3<Scalar_, Options>> {
   /// Construct x-axis rotation.
   ///
   static SOPHUS_FUNC SO3 rotX(Scalar const& x) {
+      std::cout<<"SO3 rotX"<<std::endl;
     return SO3::exp(Sophus::Vector3<Scalar>(x, Scalar(0), Scalar(0)));
   }
 
   /// Construct y-axis rotation.
   ///
   static SOPHUS_FUNC SO3 rotY(Scalar const& y) {
-    return SO3::exp(Sophus::Vector3<Scalar>(Scalar(0), y, Scalar(0)));
+      std::cout<<"SO3 rotY"<<std::endl;
+      return SO3::exp(Sophus::Vector3<Scalar>(Scalar(0), y, Scalar(0)));
   }
 
   /// Construct z-axis rotation.
   ///
   static SOPHUS_FUNC SO3 rotZ(Scalar const& z) {
-    return SO3::exp(Sophus::Vector3<Scalar>(Scalar(0), Scalar(0), z));
+      std::cout<<"SO3 rotZ"<<std::endl;
+      return SO3::exp(Sophus::Vector3<Scalar>(Scalar(0), Scalar(0), z));
   }
 
   /// Draw uniform sample from SO(3) manifold.

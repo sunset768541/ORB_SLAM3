@@ -1609,6 +1609,8 @@ Sophus::SE3f Tracking::GrabImageMonocular(const cv::Mat &im, const double &times
 #endif
 
     lastID = mCurrentFrame.mnId;
+
+//    cout<<"=============Tracking a new frame tp "<<timestamp<<" ========="<<endl;
     Track();
 
     return mCurrentFrame.GetPose();
@@ -1680,6 +1682,7 @@ void Tracking::PreintegrateIMU()
         return;
     }
 
+//    cout<<" Track imu n =  "<< n <<" current frame "<<mCurrentFrame.mTimeStamp<<endl;
     IMU::Preintegrated* pImuPreintegratedFromLastFrame = new IMU::Preintegrated(mLastFrame.mImuBias,mCurrentFrame.mImuCalib);
 
     for(int i=0; i<n; i++)
@@ -1794,6 +1797,7 @@ void Tracking::ResetFrameIMU()
 void Tracking::Track()
 {
 
+    Verbose::PrintMess("====== Start Tracking =========",Verbose::VERBOSITY_DEBUG);
     if (bStepByStep)
     {
         std::cout << "Tracking: Waiting to the next step" << std::endl;
@@ -1904,6 +1908,7 @@ void Tracking::Track()
         }
         else
         {
+//            cout<<" Start MonocularInitialization" <<endl;
             MonocularInitialization();
         }
 
@@ -1924,7 +1929,7 @@ void Tracking::Track()
     {
         // System is initialized. Track Frame.
         bool bOK;
-
+//        cout<<"  MonocularInitialization  ok next track" <<endl;
 #ifdef REGISTER_TIMES
         std::chrono::steady_clock::time_point time_StartPosePred = std::chrono::steady_clock::now();
 #endif
@@ -2198,6 +2203,7 @@ void Tracking::Track()
 #endif
 
         // Update drawer
+//        cout<<" Tracking Update drawer "<<endl;
         mpFrameDrawer->Update(this);
         if(mCurrentFrame.isSet())
             mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.GetPose());
@@ -2490,6 +2496,7 @@ void Tracking::MonocularInitialization()
         // Find correspondences
         ORBmatcher matcher(0.9,true);
         int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
+        cout<<"MonocularInitialization 2499 nmatches"<<nmatches<<endl;
 
         // Check if there are enough correspondences
         if(nmatches<100)
@@ -2517,6 +2524,7 @@ void Tracking::MonocularInitialization()
             mCurrentFrame.SetPose(Tcw);
 
             CreateInitialMapMonocular();
+            cout<<" **Monoc init success***"<<endl;
         }
     }
 }
@@ -2862,6 +2870,7 @@ bool Tracking::TrackWithMotionModel()
     if (mpAtlas->isImuInitialized() && (mCurrentFrame.mnId>mnLastRelocFrameId+mnFramesToResetIMU))
     {
         // Predict state with IMU if it is initialized and it doesnt need reset
+        cout<<"use PredictState IMU to "<<endl;
         PredictStateIMU();
         return true;
     }
@@ -2967,8 +2976,11 @@ bool Tracking::TrackLocalMap()
         }
 
     int inliers;
-    if (!mpAtlas->isImuInitialized())
+    if (!mpAtlas->isImuInitialized()){
         Optimizer::PoseOptimization(&mCurrentFrame);
+        Verbose::PrintMess(" Prur Visual Optimizer",Verbose::VERBOSITY_DEBUG);
+        cout<<" before pv op aux1 "<<aux1<<" aux2 "<<aux2<<endl;
+    }
     else
     {
         if(mCurrentFrame.mnId<=mnLastRelocFrameId+mnFramesToResetIMU)
@@ -2990,6 +3002,7 @@ bool Tracking::TrackLocalMap()
                 inliers = Optimizer::PoseInertialOptimizationLastKeyFrame(&mCurrentFrame); // , !mpLastKeyFrame->GetMap()->GetIniertialBA1());
             }
         }
+        cout<<" before imu op aux1 "<<aux1<<" aux2 "<<aux2<<endl;
     }
 
     aux1 = 0, aux2 = 0;
@@ -3002,7 +3015,7 @@ bool Tracking::TrackLocalMap()
         }
 
     mnMatchesInliers = 0;
-
+    cout<<" after  op aux1 "<<aux1<<" aux2 "<<aux2<<endl;
     // Update MapPoints Statistics
     for(int i=0; i<mCurrentFrame.N; i++)
     {
@@ -3027,8 +3040,10 @@ bool Tracking::TrackLocalMap()
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
     mpLocalMapper->mnMatchesInliers=mnMatchesInliers;
-    if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50)
+    if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50) {
+        cout<<"3038 IMU MAR mnMatchesInliers ="<<mnMatchesInliers<<endl;
         return false;
+    }
 
     if((mnMatchesInliers>10)&&(mState==RECENTLY_LOST))
         return true;
@@ -3036,8 +3051,9 @@ bool Tracking::TrackLocalMap()
 
     if (mSensor == System::IMU_MONOCULAR)
     {
-        if((mnMatchesInliers<15 && mpAtlas->isImuInitialized())||(mnMatchesInliers<50 && !mpAtlas->isImuInitialized()))
+        if((mnMatchesInliers<15 && mpAtlas->isImuInitialized())||(mnMatchesInliers<30 && !mpAtlas->isImuInitialized()))
         {
+            cout<<"IMU MAR mnMatchesInliers="<<mnMatchesInliers<<" mpAtlas->isImuInitialized() "<<mpAtlas->isImuInitialized()<<endl;
             return false;
         }
         else

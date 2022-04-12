@@ -658,31 +658,40 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float  &y, const f
 {
     vector<size_t> vIndices;
     vIndices.reserve(N);
-
+//    cout<<"GetFeaturesInArea x"<<x<<" y = "<<y<<" r "<<r<<endl;
     float factorX = r;
     float factorY = r;
 
     const int nMinCellX = max(0,(int)floor((x-mnMinX-factorX)*mfGridElementWidthInv));
     if(nMinCellX>=FRAME_GRID_COLS)
     {
+//        cout<<"nMinCellX>=FRAME_GRID_COLS 668"<<endl;
         return vIndices;
     }
 
     const int nMaxCellX = min((int)FRAME_GRID_COLS-1,(int)ceil((x-mnMinX+factorX)*mfGridElementWidthInv));
     if(nMaxCellX<0)
     {
+        //mnMinX -78.638107299804688 factorX 100 mfGridElementWidthInv -13.586308479309082
+//        cout<<"nMaxCellX<0 675"<<" FRAME_GRID_COLS"<<FRAME_GRID_COLS<<" mnMinX "<<mnMinX<<" factorX "<<factorX<<" mfGridElementWidthInv "<<mfGridElementWidthInv<<endl;
+
+
         return vIndices;
     }
 
     const int nMinCellY = max(0,(int)floor((y-mnMinY-factorY)*mfGridElementHeightInv));
     if(nMinCellY>=FRAME_GRID_ROWS)
     {
+//        cout<<"nMinCellY>=FRAME_GRID_ROW 683"<<endl;
+
         return vIndices;
     }
 
     const int nMaxCellY = min((int)FRAME_GRID_ROWS-1,(int)ceil((y-mnMinY+factorY)*mfGridElementHeightInv));
     if(nMaxCellY<0)
     {
+//        cout<<"nMaxCellY<0 691"<<endl;
+
         return vIndices;
     }
 

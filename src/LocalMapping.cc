@@ -23,7 +23,7 @@
 #include "Optimizer.h"
 #include "Converter.h"
 #include "GeometricTools.h"
-
+#include <math.h>
 #include<mutex>
 #include<chrono>
 
@@ -1235,7 +1235,13 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
             if (!(*itKF)->mPrevKF)
                 continue;
 
+            if (   !isfinite((*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity()[0]) ){
+                std::cout<<" Get update Veloctity < 0"<<std::endl;
+                continue;
+            }
+            std::cout<<"\n 1 dirG \n"<<dirG<<"\n (*itKF)->mPrevKF->GetImuRotation() \n"<<(*itKF)->mPrevKF->GetImuRotation()<<"\n (*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity() \n"<<(*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity()<<std::endl;
             dirG -= (*itKF)->mPrevKF->GetImuRotation() * (*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity();
+            std::cout<<"2 dirG \n"<<dirG<<std::endl;
             Eigen::Vector3f _vel = ((*itKF)->GetImuPosition() - (*itKF)->mPrevKF->GetImuPosition())/(*itKF)->mpImuPreintegrated->dT;
             (*itKF)->SetVelocity(_vel);
             (*itKF)->mPrevKF->SetVelocity(_vel);
@@ -1248,6 +1254,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
         const float cosg = gI.dot(dirG);
         const float ang = acos(cosg);
         Eigen::Vector3f vzg = v*ang/nv;
+        std::cout<<"LocalMapping InitializeIMU"<<"  v = "<<v<<" ang = "<<ang<<" nv = "<<nv<<" dirG "<<dirG<<std::endl;
         Rwg = Sophus::SO3f::exp(vzg).matrix();
         mRwg = Rwg.cast<double>();
         mTinit = mpCurrentKeyFrame->mTimeStamp-mFirstTs;
@@ -1296,6 +1303,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
     if (!mpAtlas->isImuInitialized())
     {
         mpAtlas->SetImuInitialized();
+        cout<<"***Local Mapping IMU init OK***"<<endl;
         mpTracker->t0IMU = mpTracker->mCurrentFrame.mTimeStamp;
         mpCurrentKeyFrame->bImu = true;
     }

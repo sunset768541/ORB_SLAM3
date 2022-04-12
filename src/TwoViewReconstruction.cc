@@ -517,8 +517,9 @@ namespace ORB_SLAM3
             nsimilar++;
 
         // If there is not a clear winner or not enough triangulated points reject initialization
-        if(maxGood<nMinGood || nsimilar>1)
+        if(maxGood<nMinGood || nsimilar>2)
         {
+            cout<<"522 maxGood<nMinGood maxGood"<<maxGood<<" nMinGood "<<nMinGood<<" mvMatches12 "<<mvMatches12.size()<<" vbMatchesInliers "<<vbMatchesInliers.size()<<endl;
             return false;
         }
 
@@ -564,7 +565,7 @@ namespace ORB_SLAM3
                 return true;
             }
         }
-
+        cout<<"RF 568 maxGood "<<maxGood<<" minParallax "<<minParallax<<" parallax1 "<<parallax1<<" parallax2 "<<parallax2<<" parallax3 "<<parallax3<<" parallax4 "<<parallax4<<endl;
         return false;
     }
 
@@ -596,6 +597,7 @@ namespace ORB_SLAM3
 
         if(d1/d2<1.00001 || d2/d3<1.00001)
         {
+            cout<<"RH 600 d1"<<d1<<" d2 "<<d2<<" d3 "<<d3<<endl;
             return false;
         }
 
@@ -729,7 +731,7 @@ namespace ORB_SLAM3
 
             return true;
         }
-
+        cout<<"RH 734 secondBestGood"<<secondBestGood<<" bestGood "<<bestGood<<" minParallax "<<minParallax<<" minTriangulated "<<minTriangulated<<endl;
         return false;
     }
 
@@ -829,11 +831,12 @@ namespace ORB_SLAM3
             Eigen::Vector3f x_p1(kp1.pt.x, kp1.pt.y, 1);
             Eigen::Vector3f x_p2(kp2.pt.x, kp2.pt.y, 1);
 
-            GeometricTools::Triangulate(x_p1, x_p2, P1, P2, p3dC1);
+            GeometricTools::Triangulate(x_p1, x_p2, P1, P2, p3dC1);//
 
 
             if(!isfinite(p3dC1(0)) || !isfinite(p3dC1(1)) || !isfinite(p3dC1(2)))
             {
+                cout<<" 839 isfinite(p3dC1(0)) " <<isfinite(p3dC1(0)) <<" isfinite(p3dC1(1)) "<<isfinite(p3dC1(1))<<" isfinite(p3dC1(2)) "<<isfinite(p3dC1(2))<<endl;
                 vbGood[vMatches12[i].first]=false;
                 continue;
             }
@@ -848,14 +851,18 @@ namespace ORB_SLAM3
             float cosParallax = normal1.dot(normal2) / (dist1*dist2);
 
             // Check depth in front of first camera (only if enough parallax, as "infinite" points can easily go to negative depth)
-            if(p3dC1(2)<=0 && cosParallax<0.99998)
+            if(p3dC1(2)<=0 && cosParallax<0.99998){
+//                cout<<"855 p3dC1(2) "<<p3dC1(2)<<" cosParallax "<<cosParallax<<endl;
                 continue;
+            }
 
             // Check depth in front of second camera (only if enough parallax, as "infinite" points can easily go to negative depth)
             Eigen::Vector3f p3dC2 = R * p3dC1 + t;
 
-            if(p3dC2(2)<=0 && cosParallax<0.99998)
+            if(p3dC2(2)<=0 && cosParallax<0.99998){
+//                cout<<"855 p3dC1(2) "<<p3dC2(2)<<" cosParallax "<<cosParallax<<endl;
                 continue;
+            }
 
             // Check reprojection error in first image
             float im1x, im1y;
@@ -876,8 +883,10 @@ namespace ORB_SLAM3
 
             float squareError2 = (im2x-kp2.pt.x)*(im2x-kp2.pt.x)+(im2y-kp2.pt.y)*(im2y-kp2.pt.y);
 
-            if(squareError2>th2)
+            if(squareError2>th2){
+                cout<<" 887 squareError2 "<<squareError2<<" th2 "<<th2<<endl;
                 continue;
+            }
 
             vCosParallax.push_back(cosParallax);
             vP3D[vMatches12[i].first] = cv::Point3f(p3dC1(0), p3dC1(1), p3dC1(2));

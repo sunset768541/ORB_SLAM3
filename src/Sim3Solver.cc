@@ -365,6 +365,8 @@ void Sim3Solver::ComputeSim3(Eigen::Matrix3f &P1, Eigen::Matrix3f &P2)
     double ang=atan2(vec.norm(),evec(0,maxIndex));
 
     vec = 2*ang*vec/vec.norm(); //Angle-axis representation. quaternion angle is the half
+    std::cout<<"Sim3Solver ComputeSim3"<<std::endl;
+
     mR12i = Sophus::SO3f::exp(vec).matrix();
 
     // Step 5: Rotate set 2

@@ -648,6 +648,7 @@ namespace ORB_SLAM3
     int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f> &vbPrevMatched, vector<int> &vnMatches12, int windowSize)
     {
         int nmatches=0;
+//        cout<<"SearchForInitialization"<<endl;
         vnMatches12 = vector<int>(F1.mvKeysUn.size(),-1);
 
         vector<int> rotHist[HISTO_LENGTH];
@@ -669,6 +670,7 @@ namespace ORB_SLAM3
 
             if(vIndices2.empty())
                 continue;
+//            cout<<"SearchForInitialization 673 nmatches "<<nmatches<<endl;
 
             cv::Mat d1 = F1.mDescriptors.row(i1);
 
@@ -706,12 +708,14 @@ namespace ORB_SLAM3
                     if(vnMatches21[bestIdx2]>=0)
                     {
                         vnMatches12[vnMatches21[bestIdx2]]=-1;
+//                        cout<<"SearchForInitialization 710 nmatches "<<nmatches<<endl;
                         nmatches--;
                     }
                     vnMatches12[i1]=bestIdx2;
                     vnMatches21[bestIdx2]=i1;
                     vMatchedDistance[bestIdx2]=bestDist;
                     nmatches++;
+//                    cout<<"SearchForInitialization 717 nmatches "<<nmatches<<endl;
 
                     if(mbCheckOrientation)
                     {
@@ -725,9 +729,13 @@ namespace ORB_SLAM3
                         rotHist[bin].push_back(i1);
                     }
                 }
+            } else{
+//                cout<<"SearchForInitialization 733 nmatches "<<nmatches<<endl;
+
             }
 
         }
+//        cout<<"SearchForInitialization F1.mvKeysUn.size() "<<F1.mvKeysUn.size()<<endl;
 
         if(mbCheckOrientation)
         {
@@ -747,6 +755,7 @@ namespace ORB_SLAM3
                     if(vnMatches12[idx1]>=0)
                     {
                         vnMatches12[idx1]=-1;
+//                        cout<<"SearchForInitialization 751 nmatches "<<nmatches<<endl;
                         nmatches--;
                     }
                 }
