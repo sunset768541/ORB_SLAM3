@@ -24,7 +24,7 @@
 #include<queue>
 #include<thread>
 #include<mutex>
-
+#include <math.h>
 #include<ros/ros.h>
 #include<cv_bridge/cv_bridge.h>
 #include<sensor_msgs/Imu.h>

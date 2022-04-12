@@ -20,7 +20,7 @@
 #include "Converter.h"
 
 #include "GeometricTools.h"
-
+#include <cmath>
 #include<iostream>
 
 namespace ORB_SLAM3
@@ -174,8 +174,12 @@ void Preintegrated::Reintegrate()
         IntegrateNewMeasurement(aux[i].a,aux[i].w,aux[i].t);
 }
 
+
 void Preintegrated::IntegrateNewMeasurement(const Eigen::Vector3f &acceleration, const Eigen::Vector3f &angVel, const float &dt)
 {
+    if (std::isinf(angVel(0)) || std::isinf(angVel(1))|| std::isinf(angVel(2))){
+        return;
+    }
     mvMeasurements.push_back(integrable(acceleration,angVel,dt));
 
     // Position is updated firstly, as it depends on previously computed velocity and rotation.
@@ -216,6 +220,7 @@ void Preintegrated::IntegrateNewMeasurement(const Eigen::Vector3f &acceleration,
     JVg = JVg - dR*dt*Wacc*JRg;
 
     // Update delta rotation
+//    std::cout<<"----- \n angVel "<<angVel<<"----- \n b "<<b<<std::endl;
     IntegratedRotation dRi(angVel,b,dt);
     dR = NormalizeRotation(dR*dRi.deltaR);
 
@@ -229,6 +234,7 @@ void Preintegrated::IntegrateNewMeasurement(const Eigen::Vector3f &acceleration,
 
     // Update rotation jacobian wrt bias correction
     JRg = dRi.deltaR.transpose()*JRg - dRi.rightJ*dt;
+//    std::cout<<"\n JRg"<<JRg<<" \n comput JRg dRi.deltaR "<<dRi.deltaR<<" \n dRi.rightJ "<<dRi.rightJ<<std::endl;//JRg nan
 
     // Total integrated time
     dT += dt;
@@ -285,7 +291,7 @@ Eigen::Matrix3f Preintegrated::GetDeltaRotation(const Bias &b_)
     std::unique_lock<std::mutex> lock(mMutex);
     Eigen::Vector3f dbg;
     dbg << b_.bwx-b.bwx,b_.bwy-b.bwy,b_.bwz-b.bwz;
-    std::cout<<"ImuTypes GetDeltaRotation"<< JRg * dbg <<std::endl;
+//    std::cout<<"ImuTypes GetDeltaRotation JRg = "<< JRg <<" dbg = "<< dbg <<std::endl;
     return NormalizeRotation(dR * Sophus::SO3f::exp(JRg * dbg).matrix());
 }
 
