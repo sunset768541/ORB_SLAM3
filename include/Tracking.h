@@ -139,6 +139,7 @@ public:
     Frame mLastFrame;
 
     cv::Mat mImGray;
+    cv::Mat mImLastGray;
 
     // Initialization Variables (Monocular)
     std::vector<int> mvIniLastMatches;

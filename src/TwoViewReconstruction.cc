@@ -565,7 +565,7 @@ namespace ORB_SLAM3
                 return true;
             }
         }
-        cout<<"RF 568 maxGood "<<maxGood<<" minParallax "<<minParallax<<" parallax1 "<<parallax1<<" parallax2 "<<parallax2<<" parallax3 "<<parallax3<<" parallax4 "<<parallax4<<endl;
+//        cout<<"RF 568 maxGood "<<maxGood<<" minParallax "<<minParallax<<" parallax1 "<<parallax1<<" parallax2 "<<parallax2<<" parallax3 "<<parallax3<<" parallax4 "<<parallax4<<endl;
         return false;
     }
 

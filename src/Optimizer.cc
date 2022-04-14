@@ -1000,9 +1000,10 @@ int Optimizer::PoseOptimization(Frame *pFrame)
     // At the next optimization, outliers are not included, but at the end they can be classified as inliers again.
     const float chi2Mono[4]={5.991,5.991,5.991,5.991};
     const float chi2Stereo[4]={7.815,7.815,7.815, 7.815};
-    const int its[4]={10,10,10,10};    
+    const int its[4]={30,30,30,30};    
 
     int nBad=0;
+//    cout<<"Optimizer total eage = "<<vpEdgesMono.size()<<endl;
     for(size_t it=0; it<4; it++)
     {
         Tcw = pFrame->GetPose();
@@ -1026,7 +1027,8 @@ int Optimizer::PoseOptimization(Frame *pFrame)
             const float chi2 = e->chi2();
 
             if(chi2>chi2Mono[it])
-            {                
+            {
+//                cout<<"Optimizer i = "<<i<<" chi2 "<<chi2<<endl;
                 pFrame->mvbOutlier[idx]=true;
                 e->setLevel(1);
                 nBad++;
@@ -4564,6 +4566,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
                     Eigen::Matrix<double,2,1> obs;
                     obs << kpUn.pt.x, kpUn.pt.y;
 
+                    //already get the worldPos
                     EdgeMonoOnlyPose* e = new EdgeMonoOnlyPose(pMP->GetWorldPos(),0);
 
                     e->setVertex(0,VP);
@@ -4736,6 +4739,10 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
 
             if((chi2>chi2Mono[it]&&!bClose)||(bClose && chi2>chi2close)||!e->isDepthPositive())
             {
+                //zhe ge waidian taiduo
+                cout<<"\nIMU Op Key chi2 error : "<< chi2<<endl;
+                e->computeError();
+                pFrame->mvKeysUn[idx].pt.x;
                 pFrame->mvbOutlier[idx]=true;
                 e->setLevel(1);
                 nBadMono++;
@@ -5134,6 +5141,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
 
             if((chi2>chi2Mono[it]&&!bClose)||(bClose && chi2>chi2close)||!e->isDepthPositive())
             {
+                //
                 pFrame->mvbOutlier[idx]=true;
                 e->setLevel(1);
                 nBadMono++;

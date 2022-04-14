@@ -138,10 +138,10 @@ void LocalMapping::Run()
                             if((mTinit<10.f) && (dist<0.02))
                             {
                                 cout << "Not enough motion for initializing. Reseting..." << endl;
-                                unique_lock<mutex> lock(mMutexReset);
-                                mbResetRequestedActiveMap = true;
-                                mpMapToReset = mpCurrentKeyFrame->GetMap();
-                                mbBadImu = true;
+//                                unique_lock<mutex> lock(mMutexReset);
+//                                mbResetRequestedActiveMap = true;
+//                                mpMapToReset = mpCurrentKeyFrame->GetMap();
+//                                mbBadImu = true;
                             }
                         }
 
@@ -1239,9 +1239,9 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
                 std::cout<<" Get update Veloctity < 0"<<std::endl;
                 continue;
             }
-            std::cout<<"\n 1 dirG \n"<<dirG<<"\n (*itKF)->mPrevKF->GetImuRotation() \n"<<(*itKF)->mPrevKF->GetImuRotation()<<"\n (*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity() \n"<<(*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity()<<std::endl;
+//            std::cout<<"\n 1 dirG \n"<<dirG<<"\n (*itKF)->mPrevKF->GetImuRotation() \n"<<(*itKF)->mPrevKF->GetImuRotation()<<"\n (*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity() \n"<<(*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity()<<std::endl;
             dirG -= (*itKF)->mPrevKF->GetImuRotation() * (*itKF)->mpImuPreintegrated->GetUpdatedDeltaVelocity();
-            std::cout<<"2 dirG \n"<<dirG<<std::endl;
+//            std::cout<<"2 dirG \n"<<dirG<<std::endl;
             Eigen::Vector3f _vel = ((*itKF)->GetImuPosition() - (*itKF)->mPrevKF->GetImuPosition())/(*itKF)->mpImuPreintegrated->dT;
             (*itKF)->SetVelocity(_vel);
             (*itKF)->mPrevKF->SetVelocity(_vel);

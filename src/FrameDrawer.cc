@@ -32,6 +32,7 @@ FrameDrawer::FrameDrawer(Atlas* pAtlas):both(false),mpAtlas(pAtlas)
     mState=Tracking::SYSTEM_NOT_READY;
     mIm = cv::Mat(480,640,CV_8UC3, cv::Scalar(0,0,0));
     mImRight = cv::Mat(480,640,CV_8UC3, cv::Scalar(0,0,0));
+    mLastFrame = cv::Mat(480,640,CV_8UC3, cv::Scalar(0,0,0));
 }
 
 cv::Mat FrameDrawer::DrawFrame(float imageScale)
@@ -200,7 +201,21 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale)
 
     return imWithInfo;
 }
+cv::Mat FrameDrawer::DrawFrameLast(float imageScale){
+    cv::Mat im;
 
+    {
+        unique_lock<mutex> lock(mMutex);
+    mLastFrame.copyTo(im);
+    if(imageScale != 1.f)
+    {
+        int imWidth = im.cols / imageScale;
+        int imHeight = im.rows / imageScale;
+        cv::resize(im, im, cv::Size(imWidth, imHeight));
+    }
+    }
+    return im;
+}
 cv::Mat FrameDrawer::DrawRightFrame(float imageScale)
 {
     cv::Mat im;
@@ -367,10 +382,12 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
 
 }
 
+
 void FrameDrawer::Update(Tracking *pTracker)
 {
     unique_lock<mutex> lock(mMutex);
     pTracker->mImGray.copyTo(mIm);
+    pTracker->mImLastGray.copyTo(mLastFrame);
     mvCurrentKeys=pTracker->mCurrentFrame.mvKeys;
     mThDepth = pTracker->mCurrentFrame.mThDepth;
     mvCurrentDepth = pTracker->mCurrentFrame.mvDepth;

@@ -45,11 +45,10 @@ public:
 
     // Update info from the last processed frame.
     void Update(Tracking *pTracker);
-
     // Draw last processed frame.
     cv::Mat DrawFrame(float imageScale=1.f);
     cv::Mat DrawRightFrame(float imageScale=1.f);
-
+    cv::Mat DrawFrameLast(float imageScale=1.f);
     bool both;
 
 protected:
@@ -57,7 +56,7 @@ protected:
     void DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText);
 
     // Info of the frame to be drawn
-    cv::Mat mIm, mImRight;
+    cv::Mat mIm, mImRight ,mLastFrame;
     int N;
     vector<cv::KeyPoint> mvCurrentKeys,mvCurrentKeysRight;
     vector<bool> mvbMap, mvbVO;

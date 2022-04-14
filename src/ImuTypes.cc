@@ -316,7 +316,7 @@ Eigen::Vector3f Preintegrated::GetDeltaPosition(const Bias &b_)
 Eigen::Matrix3f Preintegrated::GetUpdatedDeltaRotation()
 {
     std::unique_lock<std::mutex> lock(mMutex);
-    std::cout<<"ImuTypes GetUpdatedDeltaRotation  "<< JRg*db.head(3) <<std::endl;
+//    std::cout<<"ImuTypes GetUpdatedDeltaRotation  "<< JRg*db.head(3) <<std::endl;
 
     return NormalizeRotation(dR * Sophus::SO3f::exp(JRg*db.head(3)).matrix());
 }

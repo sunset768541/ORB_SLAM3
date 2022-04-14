@@ -68,6 +68,7 @@ namespace ORB_SLAM3
                 if(bFactor)
                     r*=th;
 
+                //给定一个坐标，返回区域内所有特征点
                 const vector<size_t> vIndices =
                         F.GetFeaturesInArea(pMP->mTrackProjX,pMP->mTrackProjY,r*F.mvScaleFactors[nPredictedLevel],nPredictedLevel-1,nPredictedLevel);
 

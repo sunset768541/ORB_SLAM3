@@ -320,6 +320,11 @@ void Viewer::Run()
         cv::Mat toShow;
         cv::Mat im = mpFrameDrawer->DrawFrame(trackedImageScale);
 
+        cv::Mat last = mpFrameDrawer->DrawFrameLast(trackedImageScale);
+//        cout<<" last image "<<last<<endl;
+//        if (!last.empty()) {
+//            cv::imshow("ORB-SLAM3: Last Frame",last);
+//        }
         if(both){
             cv::Mat imRight = mpFrameDrawer->DrawRightFrame(trackedImageScale);
             cv::hconcat(im,imRight,toShow);

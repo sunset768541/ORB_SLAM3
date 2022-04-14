@@ -472,6 +472,12 @@ void Frame::SetImuPoseVelocity(const Eigen::Matrix3f &Rwb, const Eigen::Vector3f
 void Frame::UpdatePoseMatrices()
 {
     Sophus::SE3<float> Twc = mTcw.inverse();
+    // mOw：    当前相机光心在世界坐标系下坐标
+    // mTcw：   世界坐标系到相机坐标系的变换矩阵
+    // mRcw：   世界坐标系到相机坐标系的旋转矩阵
+    // mtcw：   世界坐标系到相机坐标系的平移向量
+    // mRwc：   相机坐标系到世界坐标系的旋转矩阵
+
     mRwc = Twc.rotationMatrix();
     mOw = Twc.translation();
     mRcw = mTcw.rotationMatrix();
@@ -508,7 +514,7 @@ Eigen::Vector3f Frame::GetRelativePoseTlr_translation() {
     return mTlr.translation();
 }
 
-
+// panduan yig imu
 bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit)
 {
     if(Nleft == -1){

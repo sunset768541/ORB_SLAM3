@@ -391,7 +391,7 @@ class EdgeMonoOnlyPose : public g2o::BaseUnaryEdge<2,Eigen::Vector2d,VertexPose>
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
+//Xw shi di tu dian de zuobiao
     EdgeMonoOnlyPose(const Eigen::Vector3f &Xw_, int cam_idx_=0):Xw(Xw_.cast<double>()),
         cam_idx(cam_idx_){}
 
@@ -401,7 +401,12 @@ public:
     void computeError(){
         const VertexPose* VPose = static_cast<const VertexPose*>(_vertices[0]);
         const Eigen::Vector2d obs(_measurement);
-        _error = obs - VPose->estimate().Project(Xw,cam_idx);
+        //jisuan shiji de touying wu cha
+        //
+        //
+        const Eigen::Vector2d pp = VPose->estimate().Project(Xw,cam_idx);
+        _error = obs - pp;
+        cout<<"\n Obs: "<<obs<<"\n Project: "<<pp<<endl;
     }
 
     virtual void linearizeOplus();
