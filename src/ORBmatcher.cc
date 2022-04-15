@@ -134,7 +134,7 @@ namespace ORB_SLAM3
                                 nmatches++;
                                 right++;
                             }
-
+                            cout<<" bestDist "<<bestDist<<endl;
                             nmatches++;
                             left++;
                         }

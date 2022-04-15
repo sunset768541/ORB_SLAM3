@@ -41,7 +41,10 @@ public:
     void computeError()  {
         const g2o::VertexSE3Expmap* v1 = static_cast<const g2o::VertexSE3Expmap*>(_vertices[0]);
         Eigen::Vector2d obs(_measurement);
-        _error = obs-pCamera->project(v1->estimate().map(Xw));
+        Eigen::Vector2d  proj=pCamera->project(v1->estimate().map(Xw));
+        _error = obs-proj;
+
+//        std::cout<<"\n ESE3Proj Obs = "<<obs<<" \n  Proj = "<< proj <<" \n chi2 "<<_error.dot(information()*_error)<<std::endl;
     }
 
     bool isDepthPositive() {

@@ -1021,11 +1021,13 @@ int Optimizer::PoseOptimization(Frame *pFrame)
 
             if(pFrame->mvbOutlier[idx])
             {
+                cout<<" idx mvOutliber "<<idx<<endl;
                 e->computeError();
             }
 
             const float chi2 = e->chi2();
 
+            cout<<"real chi2 " <<chi2<<endl;
             if(chi2>chi2Mono[it])
             {
 //                cout<<"Optimizer i = "<<i<<" chi2 "<<chi2<<endl;
