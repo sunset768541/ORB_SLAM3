@@ -3457,7 +3457,7 @@ void Tracking::UpdateLocalPoints()
     {
         KeyFrame* pKF = *itKF;
         const vector<MapPoint*> vpMPs = pKF->GetMapPointMatches();
-        cout<<"index "<<index<<" local keyframe MapPoint "<<vpMPs.size()<<endl;
+//        cout<<"index "<<index<<" local keyframe MapPoint "<<vpMPs.size()<<endl;
         int  indexAddp=0;
         for(vector<MapPoint*>::const_iterator itMP=vpMPs.begin(), itEndMP=vpMPs.end(); itMP!=itEndMP; itMP++)
         {
@@ -3475,7 +3475,7 @@ void Tracking::UpdateLocalPoints()
                 pMP->mnTrackReferenceForFrame=mCurrentFrame.mnId;
             }
         }
-        cout<<"index "<<index<<" index Add p "<<indexAddp<<endl;
+//        cout<<"index "<<index<<" index Add p "<<indexAddp<<endl;
         index++;
         indexAddp=0;
     }

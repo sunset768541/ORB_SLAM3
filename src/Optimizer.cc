@@ -1021,13 +1021,13 @@ int Optimizer::PoseOptimization(Frame *pFrame)
 
             if(pFrame->mvbOutlier[idx])
             {
-                cout<<" idx mvOutliber "<<idx<<endl;
+//                cout<<" idx mvOutliber "<<idx<<endl;
                 e->computeError();
             }
 
             const float chi2 = e->chi2();
 
-            cout<<"real chi2 " <<chi2<<endl;
+//            cout<<"real chi2 " <<chi2<<endl;
             if(chi2>chi2Mono[it])
             {
 //                cout<<"Optimizer i = "<<i<<" chi2 "<<chi2<<endl;
@@ -4742,7 +4742,7 @@ int Optimizer::PoseInertialOptimizationLastKeyFrame(Frame *pFrame, bool bRecInit
             if((chi2>chi2Mono[it]&&!bClose)||(bClose && chi2>chi2close)||!e->isDepthPositive())
             {
                 //zhe ge waidian taiduo
-                cout<<"\nIMU Op Key chi2 error : "<< chi2<<endl;
+//                cout<<"\nIMU fail  chi2 error : "<< chi2<<endl;
                 e->computeError();
                 pFrame->mvKeysUn[idx].pt.x;
                 pFrame->mvbOutlier[idx]=true;

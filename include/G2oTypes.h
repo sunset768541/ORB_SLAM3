@@ -406,7 +406,7 @@ public:
         //
         const Eigen::Vector2d pp = VPose->estimate().Project(Xw,cam_idx);
         _error = obs - pp;
-        cout<<"\n Obs: "<<obs<<"\n Project: "<<pp<<endl;
+//        cout<<"\n Obs: "<<obs<<"\n Project: "<<pp<<endl;
     }
 
     virtual void linearizeOplus();
