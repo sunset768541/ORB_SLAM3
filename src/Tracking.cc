@@ -1991,8 +1991,10 @@ void Tracking::Track()
                     bOK = true;
                     if((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD))
                     {
-                        if(pCurrentMap->isImuInitialized())
+                        if(pCurrentMap->isImuInitialized()) {
+                            cout<<" mState == Recent Lost ,PredictStateIMU "<<endl;
                             PredictStateIMU();
+                        }
                         else
                             bOK = false;
 
@@ -2154,7 +2156,7 @@ void Tracking::Track()
                 Verbose::PrintMess("Track lost for less than one second...", Verbose::VERBOSITY_NORMAL);
                 if(!pCurrentMap->isImuInitialized() || !pCurrentMap->GetIniertialBA2())
                 {
-                    cout << "IMU is not or recently initialized. Reseting active map..." << endl;
+                    cout << "IMU is not or recently initialized. Reseting active map..." <<" isImuInitialized() "<<pCurrentMap->isImuInitialized()<<" GetIniertialBA2 "<<pCurrentMap->GetIniertialBA2()<< endl;
                     mpSystem->ResetActiveMap();
                 }
 
@@ -2217,6 +2219,7 @@ void Tracking::Track()
                 Sophus::SE3f LastTwc = mLastFrame.GetPose().inverse();
                 mVelocity = mCurrentFrame.GetPose() * LastTwc;
                 mbVelocity = true;
+                cout<<"Update Velocity " << mVelocity.data() <<endl;
             }
             else {
                 mbVelocity = false;
