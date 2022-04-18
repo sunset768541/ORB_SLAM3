@@ -398,7 +398,7 @@ Sophus::SE3f System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const
 
 Sophus::SE3f System::TrackMonocular(const cv::Mat &im, const double &timestamp, const vector<IMU::Point>& vImuMeas, string filename)
 {
-    cout<<"System ****  TrackMonocular  "<<(timestamp-pretimestamp)<< " imu num "<<vImuMeas.size()<<endl;
+    cout<<"=============System  TrackMonocular  "<<(timestamp-pretimestamp)<< " imu num "<<vImuMeas.size()<<" TS "<<timestamp<<"==========="<<endl;
 
     {
         unique_lock<mutex> lock(mMutexReset);

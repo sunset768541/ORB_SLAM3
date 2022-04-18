@@ -1760,7 +1760,7 @@ bool Tracking::PredictStateIMU()
         Eigen::Vector3f twb2 = twb1 + Vwb1*t12 + 0.5f*t12*t12*Gz+ Rwb1*mpImuPreintegratedFromLastKF->GetDeltaPosition(mpLastKeyFrame->GetImuBias());
         Eigen::Vector3f Vwb2 = Vwb1 + t12*Gz + Rwb1 * mpImuPreintegratedFromLastKF->GetDeltaVelocity(mpLastKeyFrame->GetImuBias());
         mCurrentFrame.SetImuPoseVelocity(Rwb2,twb2,Vwb2);
-
+        cout<<" PredictStateIMU mpLastKeyFrame ImuPoseVelocity twb \n "<< twb2 <<endl;
         mCurrentFrame.mImuBias = mpLastKeyFrame->GetImuBias();
         mCurrentFrame.mPredBias = mCurrentFrame.mImuBias;
         return true;
@@ -1778,6 +1778,7 @@ bool Tracking::PredictStateIMU()
         Eigen::Vector3f Vwb2 = Vwb1 + t12*Gz + Rwb1 * mCurrentFrame.mpImuPreintegratedFrame->GetDeltaVelocity(mLastFrame.mImuBias);
 
         mCurrentFrame.SetImuPoseVelocity(Rwb2,twb2,Vwb2);
+        cout<<" PredictStateIMU mLastFrame ImuPoseVelocity twb \n "<< twb2 <<endl;
 
         mCurrentFrame.mImuBias = mLastFrame.mImuBias;
         mCurrentFrame.mPredBias = mCurrentFrame.mImuBias;
@@ -1798,7 +1799,7 @@ void Tracking::ResetFrameIMU()
 void Tracking::Track()
 {
 
-    Verbose::PrintMess("====== Start Tracking =========",Verbose::VERBOSITY_DEBUG);
+    Verbose::PrintMess("-------------- Start Tracking -----------",Verbose::VERBOSITY_DEBUG);
     if (bStepByStep)
     {
         std::cout << "Tracking: Waiting to the next step" << std::endl;
@@ -1947,7 +1948,10 @@ void Tracking::Track()
 
                 // Local Mapping might have changed some MapPoints tracked in last frame
                 CheckReplacedInLastFrame();
-
+                // Step 6.2 运动模型是空的并且imu未初始化或刚完成重定位，跟踪参考关键帧；否则恒速模型跟踪
+                // 第一个条件,如果运动模型为空并且imu未初始化,说明是刚开始第一帧跟踪，或者已经跟丢了。
+                // 第二个条件,如果当前帧紧紧地跟着在重定位的帧的后面，我们用重定位帧来恢复位姿
+                // mnLastRelocFrameId 上一次重定位的那一帧
                 if((!mbVelocity && !pCurrentMap->isImuInitialized()) || mCurrentFrame.mnId<mnLastRelocFrameId+2)
                 {
                     Verbose::PrintMess("TRACK: Track with respect to the reference KF ", Verbose::VERBOSITY_DEBUG);
@@ -1992,6 +1996,8 @@ void Tracking::Track()
                     if((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD))
                     {
                         if(pCurrentMap->isImuInitialized()) {
+                            // IMU模式下可以用IMU来预测位姿，看能否拽回来
+                            // Step 6.4 如果当前地图中IMU已经成功初始化，就用IMU数据预测位姿
                             cout<<" mState == Recent Lost ,PredictStateIMU "<<endl;
                             PredictStateIMU();
                         }
@@ -2136,7 +2142,7 @@ void Tracking::Track()
 
             }
             if(!bOK)
-                cout << "Fail to track local map!" << endl;
+                cout << "Fail to track local map! ts = " <<mCurrentFrame.mTimeStamp<< endl;
         }
         else
         {
@@ -2208,9 +2214,10 @@ void Tracking::Track()
         // Update drawer
 //        cout<<" Tracking Update drawer "<<endl;
         mpFrameDrawer->Update(this);
-        if(mCurrentFrame.isSet())
+        if(mCurrentFrame.isSet()) {
             mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.GetPose());
-
+            cout<<"2219 MapDrawer CameraPose "<< *(mCurrentFrame.GetPose().data())<<" currentFrame "<< mCurrentFrame.mTimeStamp <<endl;
+        }
         if(bOK || mState==RECENTLY_LOST)
         {
             // Update motion model
@@ -2219,14 +2226,16 @@ void Tracking::Track()
                 Sophus::SE3f LastTwc = mLastFrame.GetPose().inverse();
                 mVelocity = mCurrentFrame.GetPose() * LastTwc;
                 mbVelocity = true;
-                cout<<"Update Velocity " << mVelocity.data() <<endl;
+                cout<<"Update Velocity " << *(mVelocity.data()) <<endl;
             }
             else {
                 mbVelocity = false;
             }
 
-            if(mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
+            if(mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD){
                 mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.GetPose());
+                cout<<"2237 MapDrawer CameraPose "<< *(mCurrentFrame.GetPose().data())<<" currentFrame "<< mCurrentFrame.mTimeStamp <<endl;
+            }
 
             // Clean VO matches
             for(int i=0; i<mCurrentFrame.N; i++)
@@ -2447,7 +2456,7 @@ void Tracking::StereoInitialization()
         mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints);
 
         mpAtlas->GetCurrentMap()->mvpKeyFrameOrigins.push_back(pKFini);
-
+        cout<<"2459 MapDrawer CameraPose "<< *(mCurrentFrame.GetPose().data())<<" currentFrame "<< mCurrentFrame.mTimeStamp <<endl;
         mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.GetPose());
 
         mState=OK;
@@ -2660,7 +2669,7 @@ void Tracking::CreateInitialMapMonocular()
     mLastFrame = Frame(mCurrentFrame);
 
     mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints);
-
+    cout<<"2672 MapDrawer CameraPose "<< *(pKFcur->GetPose().data())<<" currentFrame "<< pKFcur->mTimeStamp <<endl;
     mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
 
     mpAtlas->GetCurrentMap()->mvpKeyFrameOrigins.push_back(pKFini);
@@ -2860,32 +2869,47 @@ void Tracking::UpdateLastFrame()
 
     }
 }
-
+/**
+ * @brief 根据恒定速度模型用上一帧地图点来对当前帧进行跟踪
+ * Step 1：更新上一帧的位姿；对于双目或RGB-D相机，还会根据深度值生成临时地图点
+ * Step 2：根据上一帧特征点对应地图点进行投影匹配
+ * Step 3：优化当前帧位姿
+ * Step 4：剔除地图点中外点
+ * @return 如果匹配数大于10，认为跟踪成功，返回true
+ */
 bool Tracking::TrackWithMotionModel()
 {
+    // 最小距离 < 0.9*次小距离 匹配成功，检查旋转
     ORBmatcher matcher(0.9,true);
 
     // Update last frame pose according to its reference keyframe
-    // Create "visual odometry" points if in Localization Mode
+    // Create "visual odometry" points if in Localization Mode]
+    // Step 1：更新上一帧的位姿；对于双目或RGB-D相机，还会根据深度值生成临时地图点
     UpdateLastFrame();
 
     // this yingxiang  big
+    // Step 2：根据IMU或者恒速模型得到当前帧的初始位姿。
     if (mpAtlas->isImuInitialized() && (mCurrentFrame.mnId>mnLastRelocFrameId+mnFramesToResetIMU))
     {
         // Predict state with IMU if it is initialized and it doesnt need reset
+        // Step 2：根据IMU或者恒速模型得到当前帧的初始位姿。
         cout<<"use PredictState IMU to "<<endl;
         PredictStateIMU();
         return true;
     }
     else
     {
-        mCurrentFrame.SetPose(mVelocity * mLastFrame.GetPose());
+        // Step 2：根据IMU或者恒速模型得到当前帧的初始位姿。
+        cout<<"Use pure VO to mVelocity "<< mVelocity.data() <<endl;
+        mCurrentFrame.SetPose(mVelocity * mLastFrame.GetPose());//
     }
 
 
 
 
     fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL));
+
+    // 设置特征匹配过程中的搜索半径
 
     // Project points seen in previous frame
     int th;
@@ -2895,11 +2919,12 @@ bool Tracking::TrackWithMotionModel()
     else
         th=15;
 
-
+// Step 3：用上一帧地图点进行投影匹配，如果匹配点不够，则扩大搜索半径再来一次
     int nmatches = matcher.SearchByProjection(mCurrentFrame,mLastFrame,th,mSensor==System::MONOCULAR || mSensor==System::IMU_MONOCULAR);
 
     cout<<" Tracking Motion Model nmatches "<<nmatches<<endl;
     // If few matches, uses a wider window search
+        // 如果匹配点太少，则扩大搜索半径再来一次
     if(nmatches<20)
     {
         Verbose::PrintMess("Not enough matches, wider window search!!", Verbose::VERBOSITY_NORMAL);
@@ -2910,13 +2935,25 @@ bool Tracking::TrackWithMotionModel()
 
     }
 
+
+        // 这里不同于ORB-SLAM2的方式
+//        if(nmatches<20)
+//        {
+//            Verbose::PrintMess("Not enough matches!!", Verbose::VERBOSITY_NORMAL);
+//            if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
+//                return true;//但是如果是IMU就可以继续
+//            else
+//                return false;
+//        }
+
     if(nmatches<20)
     {
         Verbose::PrintMess("Not enough matches!!", Verbose::VERBOSITY_NORMAL);
             return false;
     }
 
-    // Optimize frame pose with all matches
+        // Optimize frame pose with all matches
+        // Step 4：利用3D-2D投影关系，优化当前帧位姿
     Optimizer::PoseOptimization(&mCurrentFrame);
 
     // Discard outliers

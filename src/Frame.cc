@@ -429,6 +429,7 @@ bool Frame::isSet() const {
 }
 
 void Frame::SetPose(const Sophus::SE3<float> &Tcw) {
+    //compute pose by pure vo
     mTcw = Tcw;
 
     UpdatePoseMatrices();
@@ -456,6 +457,7 @@ Eigen::Vector3f Frame::GetVelocity() const
 
 void Frame::SetImuPoseVelocity(const Eigen::Matrix3f &Rwb, const Eigen::Vector3f &twb, const Eigen::Vector3f &Vwb)
 {
+    //compute pose by imu
     mVw = Vwb;
     mbHasVelocity = true;
 
