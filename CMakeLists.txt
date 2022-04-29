@@ -29,8 +29,8 @@ else()
 endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
-
-find_package(OpenCV 4.4)
+set(OpenCV_DIR "/home/slam/opencv343")
+find_package(OpenCV 3.4.3 QUIET)
    if(NOT OpenCV_FOUND)
       message(FATAL_ERROR "OpenCV > 4.4 not found.")
    endif()
@@ -136,6 +136,11 @@ if(realsense2_FOUND)
 endif()
 
 
+find_package(JNI REQUIRED)
+
+include_directories(${JNI_INCLUDE_DIRS})
+
+
 # Build examples
 
 # RGB-D examples
@@ -221,6 +226,20 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular-Iner
 add_executable(mono_inertial_euroc
         Examples/Monocular-Inertial/mono_inertial_euroc.cc)
 target_link_libraries(mono_inertial_euroc ${PROJECT_NAME})
+
+add_library( # Sets the name of the library.
+        orbslam3
+        # Sets the library as a shared library.
+        SHARED
+        # Provides a relative path to your source file(s).
+        Examples/Monocular-Inertial/orbslam3.cpp)
+
+target_link_libraries( # Specifies the target library.
+        orbslam3
+        ${PROJECT_NAME}
+        # Links the target library to the log library
+        # included in the NDK.
+        ${OpenCV_LIBS})
 
 add_executable(mono_inertial_tum_vi
         Examples/Monocular-Inertial/mono_inertial_tum_vi.cc)
